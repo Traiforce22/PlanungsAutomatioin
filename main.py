@@ -5,6 +5,8 @@ from db.models import Base
 import streamlit as st
 from views.urlaub import urlaub_view
 from views.mitarbeiter import mitarbeiter_view
+from views.dashboard import dashboard_view
+
 
 # Create tables if not yet present
 Base.metadata.create_all(bind=engine)
@@ -19,5 +21,4 @@ if page == "Mitarbeiter-Management":
 elif page == "Ulraub":
     urlaub_view()
 else:
-    st.header("📊 Dashboard")
-    st.info("Noch leer – hier könnten Kalender, Planungsansicht, etc. hin.")
+    dashboard_view()

@@ -21,6 +21,6 @@ class Urlaub(Base):
     mitarbeiter_id = Column(Integer, ForeignKey("mitarbeiter.id"))
     von = Column(Date)
     bis = Column(Date)
-    status = Column(String)
+    status = Column(String) #genehmigt, offen, vergangen
 
     mitarbeiter = relationship("Mitarbeiter", back_populates="urlaube")
