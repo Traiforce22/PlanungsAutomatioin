@@ -7,7 +7,7 @@ from db.session import Base
 class Mitarbeiter(Base):
     __tablename__ = "mitarbeiter"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)    
     name = Column(String, nullable=False)
     farbe = Column(String)  # Optional: Hex color code
 
