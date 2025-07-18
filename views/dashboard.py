@@ -1,34 +1,47 @@
+# views/dashboard.py
+
 import streamlit as st
 from streamlit_calendar import calendar
 from datetime import datetime, timedelta
+from db.session import SessionLocal
+from db.models import SonderOeffnungszeiten # ggf. auch Urlaub, Schicht etc.
 
 def dashboard_view():
     st.title("📅 Dashboard – Kalenderübersicht")
 
-    # Sample events (could be fetched from DB later)
-    events = [
-        {
-            "title": "Max Urlaub",
-            "start": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
-            "end": (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d"),
-            "color": "#FF5733",
-        },
-        {
-            "title": "Frühschicht – Anna",
-            "start": datetime.now().strftime("%Y-%m-%d"),
-            "color": "#33B5FF",
-        },
-    ]
+    # Auswahl, was im Kalender angezeigt werden soll
+    auswahl = st.multiselect(
+        "Anzeigen:",
+        ["Sonderöffnungszeiten", "Schichten", "Urlaube", "Events"],
+        default=["Sonderöffnungszeiten"]
+    )
+
+    db = SessionLocal()
+    einträge = []
+
+    if "Sonderöffnungszeiten" in auswahl:
+        sonder = db.query(SonderOeffnungszeiten).all()
+        for eintrag in sonder:
+            einträge.append({
+                "title": f"Sonderöffnung: {eintrag.beschreibung or ''}",
+                "start": eintrag.datum.strftime("%Y-%m-%d") + "T" + eintrag.von.strftime("%H:%M:%S"),
+                "end": eintrag.datum.strftime("%Y-%m-%d") + "T" + eintrag.bis.strftime("%H:%M:%S"),
+                "color": "#00C853",  # grün
+            })
+
+    # Weitere Einträge wie Schichten oder Urlaube:
+    # if "Schichten" in auswahl:
+    #     ...
 
     calendar_options = {
         "initialView": "dayGridMonth",
+        "locale": "de",
         "headerToolbar": {
             "left": "prev,next today",
             "center": "title",
             "right": "dayGridMonth,timeGridWeek,timeGridDay"
         },
-        "locale": "de",
-        "events": events
     }
 
-    calendar(events=events, options=calendar_options)
+    calendar(events=einträge, options=calendar_options)
+    db.close()
