@@ -7,11 +7,20 @@ from views.urlaub import urlaub_view
 from views.mitarbeiter import mitarbeiter_view
 from views.dashboard import dashboard_view
 from views.oeffnungszeiten import oeffnungszeiten_view
+from views.login import login_view
 
 
 # Create tables if not yet present
 Base.metadata.create_all(bind=engine)
 
+if "role" not in st.session_state:
+    st.session_state["role"] = None
+
+if st.session_state["role"] is None:
+    logged_in = login_view()
+    if not logged_in:
+        st.stop()  # Halt until logged in
+        
 # App-Konfiguration
 
 st.set_page_config(page_title="Schicht- & Urlaubsplaner", layout="wide")

@@ -125,6 +125,7 @@ def mitarbeiter_view():
                     db.add(neuer_mitarbeiter)
                     db.commit()
                     st.success(f"{name} {nachname} wurde hinzugefügt ✅")
+                    st.rerun()
                 except SQLAlchemyError as e:
                     db.rollback()
                     st.error("Fehler beim Speichern")
