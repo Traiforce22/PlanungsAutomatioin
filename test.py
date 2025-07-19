@@ -1,15 +1,19 @@
+from db.session import engine
+from db.models import Base
 import streamlit as st
-st.header("Testseite")
-st.write("Dies ist eine Testseite für die PlanungsAutomation App.")
-st.sidebar.title("Navigation")
+from views.urlaub import urlaub_view
+from views.mitarbeiter import mitarbeiter_view
+from views.dashboard import dashboard_view
+from views.oeffnungszeiten import oeffnungszeiten_view
+from views.login import login_view
+from db.session import SessionLocal
+from db.models import User
+from utils.auth import verify_password
 
-option = st.sidebar.selectbox("Menü", ["Start", "Einstellungen", "Über"])
-if option == "Start":
-    st.title("Willkommen")
-    col1, col2 = st.columns(2)
-    col1.write("Linke Spalte")
-    col2.write("Rechte Spalte")
-elif option == "Einstellungen":
-    st.write("Hier kannst du Einstellungen vornehmen.")
-else:
-    st.write("Über die App...")
+Base.metadata.create_all(bind=engine)
+db = SessionLocal()
+for user in db.query(User).all():
+    print(user.username, user.role, user.password_hash)
+db.close()
+
+

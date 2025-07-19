@@ -15,12 +15,12 @@ Base.metadata.create_all(bind=engine)
 
 if "role" not in st.session_state:
     st.session_state["role"] = None
+    
+# unccomment for login
+# if st.session_state["role"] is None:
+#     if not login_view():
+#         st.stop()
 
-if st.session_state["role"] is None:
-    logged_in = login_view()
-    if not logged_in:
-        st.stop()  # Halt until logged in
-        
 # App-Konfiguration
 
 st.set_page_config(page_title="Schicht- & Urlaubsplaner", layout="wide")
@@ -32,4 +32,9 @@ pages = {
 }
 
 selected_page = st.sidebar.radio("📂 Navigation", list(pages.keys()))
+# Logout button
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.clear()
+    st.rerun()
+    
 pages[selected_page]() 

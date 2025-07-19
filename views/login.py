@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_authenticator as stauth
 from db.session import SessionLocal
 from db.models import User
 from utils.auth import verify_password
@@ -8,35 +7,26 @@ def login_view():
     st.title("🔐 Login")
 
     db = SessionLocal()
-    users_db = db.query(User).all()
-
-    # Prepare dict for stauth (username: {"name": username, "password": hashed_pw})
-    credentials = {
-        u.username: {"name": u.username, "password": u.password_hash}
-        for u in users_db
-    }
+    users = db.query(User).all()
     db.close()
 
-    authenticator = stauth.Authenticate(
-        credentials,
-        "some_cookie_name",
-        "some_signature_key",
-        cookie_expiry_days=30,
-        preauthorized=None,
-    )
+    usernames = [u.username for u in users]
 
-    name, authentication_status, username = authenticator.login("Login", "main")
+    username = st.selectbox("Benutzername", usernames)  # 👈 dropdown instead of text_input
+    password = st.text_input("Passwort", type="password")
+    login_button = st.button("Login")
 
-    if authentication_status:
-        st.success(f"Willkommen, {name}!")
-        # Save user role in session state
-        user_role = next((u.role for u in users_db if u.username == username), "user")
-        st.session_state["username"] = username
-        st.session_state["role"] = user_role
-        return True
-    elif authentication_status is False:
-        st.error("Falscher Benutzername oder Passwort.")
-    else:
-        st.warning("Bitte anmelden.")
+    if login_button:
+        db = SessionLocal()
+        user = db.query(User).filter(User.username == username).first()
+        db.close()
 
-    return False
+        if user and verify_password(password, user.password_hash):
+            st.session_state["username"] = user.username
+            st.session_state["role"] = user.role
+            st.success(f"Willkommen, {user.username}!")
+            st.rerun()  # Refresh to update session state
+        else:
+            st.error("❌ Ungültiger Benutzername oder Passwort")
+
+    return "username" in st.session_state
