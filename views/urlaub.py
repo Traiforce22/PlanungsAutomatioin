@@ -34,24 +34,36 @@ def urlaub_view():
             db.add(neuer_urlaub)
             db.commit()
             st.success("Urlaub gespeichert.")
+            st.rerun()
 
-    # Bestehende Urlaube anzeigen
-    urlaube = db.query(Urlaub).all()
+    # Bestehende Urlaube anzeigen, sortiert nach 'von'-Datum
+    urlaube = db.query(Urlaub).order_by(Urlaub.von).all()
     if urlaube:
         st.subheader("Alle Urlaube")
         for eintrag in urlaube:
-            col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 2, 2])
+            col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 2, 1, 1])
             col1.write(f"👤 {eintrag.mitarbeiter.name} {eintrag.mitarbeiter.nachname}")
             col2.write(eintrag.von.strftime("%d.%m.%Y"))
             col3.write(eintrag.bis.strftime("%d.%m.%Y"))
             col4.write(f"📌 {eintrag.status}")
 
-            if col5.button("✏️ Bearbeiten", key=f"edit_{eintrag.id}"):
+            def enable_edit_mode(eintrags_id):
+                st.session_state[f"edit_{eintrags_id}"] = True
+
+            def cancel_edit_mode(eintrags_id):
+                st.session_state[f"edit_{eintrags_id}"] = False
+
+            col5.button("✏️", key=f"edit_btn_{eintrag.id}", on_click=enable_edit_mode, args=(eintrag.id,))
+
+            if st.session_state.get(f"edit_{eintrag.id}", False):
                 with st.form(f"edit_form_{eintrag.id}", clear_on_submit=False):
                     neue_von = st.date_input("Neues Von", eintrag.von, key=f"von_{eintrag.id}")
                     neue_bis = st.date_input("Neues Bis", eintrag.bis, key=f"bis_{eintrag.id}")
                     neuer_status = st.selectbox("Neuer Status", ["offen", "bestätigt", "abgelehnt"], index=["offen", "bestätigt", "abgelehnt"].index(eintrag.status), key=f"status_{eintrag.id}")
-                    speichern = st.form_submit_button("Änderungen speichern")
+
+                    col_save, col_cancel = st.columns(2)
+                    speichern = col_save.form_submit_button("💾 Speichern")
+                    abbrechen = col_cancel.form_submit_button("❌ Abbrechen")
 
                     if speichern:
                         eintrag_aktuell = db.query(Urlaub).get(eintrag.id)
@@ -59,6 +71,11 @@ def urlaub_view():
                         eintrag_aktuell.bis = neue_bis
                         eintrag_aktuell.status = neuer_status
                         db.commit()
+                        st.success("Urlaub geupdated.")
+                        st.rerun()
+
+                    if abbrechen:
+                        cancel_edit_mode(eintrag.id)
                         st.rerun()
     else:
         st.info("Keine Urlaube erfasst.")
