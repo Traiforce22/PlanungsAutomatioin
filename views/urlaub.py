@@ -21,7 +21,8 @@ def urlaub_view():
         name = st.selectbox("Mitarbeiter", list(name_map.keys()))
         von = st.date_input("Von", date.today())
         bis = st.date_input("Bis", date.today())
-        status = st.selectbox("Status", ["offen", "bestätigt", "abgelehnt"])
+        # Status wird standardmäßig auf 'offen' gesetzt
+        status = "offen"
         speichern = st.form_submit_button("Speichern")
 
         if speichern:
@@ -59,14 +60,38 @@ def urlaub_view():
                 with st.form(f"edit_form_{eintrag.id}", clear_on_submit=False):
                     neue_von = st.date_input("Neues Von", eintrag.von, key=f"von_{eintrag.id}")
                     neue_bis = st.date_input("Neues Bis", eintrag.bis, key=f"bis_{eintrag.id}")
-                    neuer_status = st.selectbox("Neuer Status", ["offen", "bestätigt", "abgelehnt"], index=["offen", "bestätigt", "abgelehnt"].index(eintrag.status), key=f"status_{eintrag.id}")
+
+                    # Nur Admins dürfen den Status ändern
+                    if st.session_state.get("role") == "admin":
+                        neuer_status = st.selectbox(
+                            "Neuer Status",
+                            ["offen", "bestätigt", "abgelehnt"],
+                            index=["offen", "bestätigt", "abgelehnt"].index(eintrag.status),
+                            key=f"status_{eintrag.id}"
+                        )
+                    else:
+                        neuer_status = eintrag.status
 
                     col_save, col_cancel = st.columns(2)
                     speichern = col_save.form_submit_button("💾 Speichern")
-                    abbrechen = col_cancel.form_submit_button("❌ Abbrechen")
+                    abbrechen = col_cancel.form_submit_button("❌ Schliessen")
 
                     if speichern:
                         eintrag_aktuell = db.query(Urlaub).get(eintrag.id)
+
+                        # Wenn der Status bereits bestätigt ist, Admin muss doppelt bestätigen Ablehnung
+                        if (
+                            eintrag_aktuell.status == "bestätigt"
+                            and neuer_status != "bestätigt"
+                            and st.session_state.get("role") == "admin"
+                        ):
+                            if "confirm_unapprove" not in st.session_state:
+                                st.warning("⚠️ Bestätigter Urlaub. Klicken Sie nochmal auf Speichern zur Bestätigung der Änderung.")
+                                st.session_state["confirm_unapprove"] = True
+                                st.stop()
+                            else:
+                                del st.session_state["confirm_unapprove"]
+
                         eintrag_aktuell.von = neue_von
                         eintrag_aktuell.bis = neue_bis
                         eintrag_aktuell.status = neuer_status

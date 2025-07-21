@@ -8,6 +8,8 @@ from views.mitarbeiter import mitarbeiter_view
 from views.dashboard import dashboard_view
 from views.oeffnungszeiten import oeffnungszeiten_view
 from views.login import login_view
+from views.schichtabtausch import schichtabtausch_view
+
 
 
 # Create tables if not yet present
@@ -16,10 +18,10 @@ Base.metadata.create_all(bind=engine)
 if "role" not in st.session_state:
     st.session_state["role"] = None
     
-# unccomment for login
-# if st.session_state["role"] is None:
-#     if not login_view():
-#         st.stop()
+#unccomment for login
+if st.session_state["role"] is None:
+    if not login_view():
+        st.stop()
 
 # App-Konfiguration
 
@@ -28,8 +30,9 @@ pages = {
     "Dashboard": dashboard_view,
     "Urlaub": urlaub_view,
     "Mitarbeiter": mitarbeiter_view,
-    "Öffnungszeiten": oeffnungszeiten_view,  # optional, only if implemented
-}
+    "Öffnungszeiten": oeffnungszeiten_view,
+    "Schichtabtausch": schichtabtausch_view,
+    }
 
 selected_page = st.sidebar.radio("📂 Navigation", list(pages.keys()))
 # Logout button

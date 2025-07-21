@@ -23,7 +23,8 @@ class Mitarbeiter(Base):
 
     urlaube = relationship("Urlaub", back_populates="mitarbeiter")
     woechentlicheschichten = relationship("WoechentlicheSchicht", back_populates="mitarbeiter", cascade="all, delete")
-
+    schichten = relationship("Schicht", back_populates="mitarbeiter", cascade="all, delete-orphan")
+    
 class Urlaub(Base):
     __tablename__ = "urlaub"
 
@@ -57,7 +58,19 @@ class SonderOeffnungszeiten(Base):
     __tablename__ = "sonder_oeffnungszeiten"
 
     id = Column(Integer, primary_key=True, index=True)
-    datum = Column(Date, nullable=False, unique=True)
+    datum = Column(Date, nullable=False, unique=False)
     von = Column(Time, nullable=False)
     bis = Column(Time, nullable=False)
     beschreibung = Column(String, nullable=True)  # Optional description for the special opening
+
+class Schicht(Base):
+    __tablename__ = "schichten"
+
+    id = Column(Integer, primary_key=True, index=True)
+    datum = Column(Date, nullable=False)
+    von = Column(Time, nullable=False)
+    bis = Column(Time, nullable=False)
+    editable = Column(Boolean, default=True)
+
+    mitarbeiter_id = Column(Integer, ForeignKey("mitarbeiter.id"), nullable=False)
+    mitarbeiter = relationship("Mitarbeiter", back_populates="schichten")

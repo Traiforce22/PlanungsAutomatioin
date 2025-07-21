@@ -35,6 +35,9 @@ def dashboard_view():
 
     calendar_options = {
         "initialView": "dayGridMonth",
+        "slotMinTime": "09:00:00",
+        "slotMaxTime": "23:00:00",
+        "height": 900,
         "locale": "de",
         "headerToolbar": {
             "left": "prev,next today",
