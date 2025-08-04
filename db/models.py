@@ -1,6 +1,6 @@
 # db/models.py
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Time
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Time, Boolean
 from sqlalchemy.orm import relationship
 from db.session import Base
 from datetime import time
@@ -46,6 +46,18 @@ class WoechentlicheSchicht(Base):
     mitarbeiter_id = Column(Integer, ForeignKey("mitarbeiter.id"), nullable=False)
     mitarbeiter = relationship("Mitarbeiter", back_populates="woechentlicheschichten")
     
+class Schicht(Base):
+    __tablename__ = "schichten"
+
+    id = Column(Integer, primary_key=True, index=True)
+    datum = Column(Date, nullable=False)
+    von = Column(Time, nullable=False)
+    bis = Column(Time, nullable=False)
+    editable = Column(Boolean, default=True)
+
+    mitarbeiter_id = Column(Integer, ForeignKey("mitarbeiter.id"), nullable=False)
+    mitarbeiter = relationship("Mitarbeiter", back_populates="schichten")
+    
 class Oeffnungszeiten(Base):
     __tablename__ = "oeffnungszeiten"
 
@@ -63,14 +75,3 @@ class SonderOeffnungszeiten(Base):
     bis = Column(Time, nullable=False)
     beschreibung = Column(String, nullable=True)  # Optional description for the special opening
 
-class Schicht(Base):
-    __tablename__ = "schichten"
-
-    id = Column(Integer, primary_key=True, index=True)
-    datum = Column(Date, nullable=False)
-    von = Column(Time, nullable=False)
-    bis = Column(Time, nullable=False)
-    editable = Column(Boolean, default=True)
-
-    mitarbeiter_id = Column(Integer, ForeignKey("mitarbeiter.id"), nullable=False)
-    mitarbeiter = relationship("Mitarbeiter", back_populates="schichten")
