@@ -1,0 +1,7 @@
+- change schichten model -> change editable to automatically editable, add editable. add boolean replacement_needed, if replacement_needed, replacement_mitarbeiter_id
+- change schichtabtausch logic -> when checking through employees vacation, set replacement_needed true, if replacement mitarbeiter is set, save it and still show it in the list.
+- generate shifts up to 6 months ahead -> new model: generierte_Tage, new entry for every day that has been generated: date and boolean generated, so it can also be deleted and regenerated
+- show shifts and holidays in calender
+
+
+- add event/course_view, where there's a list of all events and courses, and a section to add events and courses 
